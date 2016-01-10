@@ -38,8 +38,11 @@ public class NLPManager {
                     .get(CoreAnnotations.SentencesAnnotation.class)) {
                 
                 Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+                
                 int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
+                
                 String partText = sentence.toString();
+                
                 if (partText.length() > longest) {
                     mainSentiment = sentiment;
                     longest = partText.length();
@@ -47,6 +50,7 @@ public class NLPManager {
             }
         }
         
+        // 0: "Very Negative"; 1: "Negative"; 2: "Neutral"; 3: "Positive"; 4: "Very Positive"
         return mainSentiment;
     }
 }
