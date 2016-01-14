@@ -1,14 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.twittener.Entity;
 
-/**
- *
- * @author Mucheng
- */
 public class TweetMedia {
     
     public static final String TBL_NAME = "TBL_TWEETS_MEDIA";

@@ -23,8 +23,8 @@ public class TweetMediaDAO {
         PreparedStatement preparedStatement = null;
 
         try {
-            Class.forName(DAOUtil.JDBC_DRIVER);
-            connection = DriverManager.getConnection(DAOUtil.DB_URL, DAOUtil.DB_USERNAME, DAOUtil.DB_PASSWORD);
+            Class.forName(DBUtils.JDBC_DRIVER);
+            connection = DriverManager.getConnection(DBUtils.DB_URL, DBUtils.DB_USERNAME, DBUtils.DB_PASSWORD);
 
             String sql = "INSERT INTO " + TweetMedia.TBL_NAME 
                     + "(" + TweetMedia.COL_MEDIA_ID + ", " 
@@ -40,20 +40,15 @@ public class TweetMediaDAO {
             preparedStatement.setString(3, media.getMedia_Url());
             preparedStatement.setLong(4, media.getTweet_Id());
             preparedStatement.setString(5, media.getMedia_VideoUrl());
-
-            int rowsAffected = preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
         } 
-        catch (Exception ex) {
+        catch (ClassNotFoundException | SQLException ex) {
             System.out.println(ex);
+            Logger.getLogger(TweetMediaDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
         finally {
-            try {
-                preparedStatement.close();
-                connection.close();
-            } 
-            catch (SQLException ex) {
-                Logger.getLogger(TweetDAO.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            DBUtils.closeDBResource(preparedStatement);
+            DBUtils.closeDBResource(connection);
         }
     }
 }

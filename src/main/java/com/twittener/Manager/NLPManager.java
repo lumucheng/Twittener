@@ -1,31 +1,29 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.twittener.Manager;
 
 import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
+import java.util.List;
 
-/**
- *
- * @author Mucheng
- */
 public class NLPManager {
     
     static StanfordCoreNLP pipeline;
     
-     public static void init() {
+    public static void init() {
         pipeline = new StanfordCoreNLP("nlp.properties");
     }
 
-    public static int findSentiment(String tweet) {
+    public static int getSentiment(String tweet) {
 
         int mainSentiment = 0;
         
@@ -38,9 +36,9 @@ public class NLPManager {
                     .get(CoreAnnotations.SentencesAnnotation.class)) {
                 
                 Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+                tree.pennPrint();
                 
                 int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
-                
                 String partText = sentence.toString();
                 
                 if (partText.length() > longest) {
@@ -52,5 +50,32 @@ public class NLPManager {
         
         // 0: "Very Negative"; 1: "Negative"; 2: "Neutral"; 3: "Positive"; 4: "Very Positive"
         return mainSentiment;
+    }
+    
+    public static void filterTweet(String tweet, String keyword) {
+        Annotation annotation = pipeline.process(tweet);
+        
+        List<CoreMap> sentences = annotation.get(SentencesAnnotation.class);
+        
+        for (CoreMap sentence : sentences) {
+            for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
+                
+                // NOTE: maybe can check if sentence contains keyword & etc.
+                
+                // text of the token
+                String word = token.get(TextAnnotation.class);
+
+                // POS tag of the token
+                String pos = token.get(PartOfSpeechAnnotation.class);
+
+                // NER label of the token
+                String ne = token.get(NamedEntityTagAnnotation.class);
+                
+                System.out.println("Word " + word);
+                System.out.println("POS " + pos);
+                System.out.println("NER " + ne);
+                System.out.println("-----------");
+            }
+        }
     }
 }

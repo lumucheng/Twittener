@@ -1,36 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.twittener.DAO;
 
 import com.twittener.Entity.TopicAccount;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- *
- * @author Mucheng
- */
 public class TopicAccountsDAO {
     
     public ArrayList<TopicAccount> getAccountsByTopic(int topicId) {
-        ArrayList<TopicAccount> accountsList = new ArrayList<TopicAccount>();
-        String sql = "SELECT * FROM TBL_TOPIC_ACCOUNTS WHERE topic_id = " 
-                + topicId + ";";
+        
+        ArrayList<TopicAccount> accountsList = new ArrayList<>();
+        String sql = "SELECT * FROM " + TopicAccount.TBL_NAME + 
+                " WHERE " + TopicAccount.COL_TOPIC_ID + " = " + 
+                topicId + ";";
         Connection connection = null;
         Statement statement = null;
+        ResultSet resultSet = null;
         
         try {
-            Class.forName(DAOUtil.JDBC_DRIVER);
+            Class.forName(DBUtils.JDBC_DRIVER);
             connection = DriverManager.getConnection(
-                    DAOUtil.DB_URL,DAOUtil.DB_USERNAME, DAOUtil.DB_PASSWORD);
+                    DBUtils.DB_URL,DBUtils.DB_USERNAME, DBUtils.DB_PASSWORD);
             statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
+            resultSet = statement.executeQuery(sql);
 
             while (resultSet.next()) {
                 TopicAccount topicAccount = new TopicAccount();
@@ -42,12 +40,40 @@ public class TopicAccountsDAO {
                 topicAccount.setTopicId(resultSet.getInt(TopicAccount.COL_TOPIC_ID));
                 accountsList.add(topicAccount);
             }
-
-            connection.close();
         } 
-        catch (Exception ex) {
+        catch (ClassNotFoundException | SQLException ex) {
             System.out.println(ex);
+            Logger.getLogger(TopicAccountsDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
+        finally {
+            DBUtils.closeDBResource(resultSet);
+            DBUtils.closeDBResource(statement);
+            DBUtils.closeDBResource(connection);
+        }
+        
         return accountsList;
+    }
+    
+    public void updateMaxTweetId(Long twitterId) {
+        CallableStatement statement = null;
+        Connection connection = null;
+        
+        try {
+            String sql = "{call UpdateTweetId(?)}";
+            Class.forName(DBUtils.JDBC_DRIVER);
+            connection = DriverManager.getConnection(
+                    DBUtils.DB_URL,DBUtils.DB_USERNAME, DBUtils.DB_PASSWORD);
+            statement = connection.prepareCall(sql);
+            statement.setLong(1, twitterId);
+            statement.execute();
+        }
+        catch (ClassNotFoundException | SQLException ex) {
+            System.out.println(ex);
+            Logger.getLogger(TopicAccountsDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally {
+            DBUtils.closeDBResource(statement);
+            DBUtils.closeDBResource(connection);
+        }
     }
 }

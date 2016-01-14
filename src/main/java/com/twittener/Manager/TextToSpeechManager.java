@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.twittener.Manager;
 
 import com.memetix.mst.language.SpokenDialect;
@@ -19,10 +14,6 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-/**
- *
- * @author Lu
- */
 public class TextToSpeechManager {
 
     private static final String CLIENT_ID = "Twitter_Radio";
@@ -48,13 +39,13 @@ public class TextToSpeechManager {
             final HttpURLConnection urlConnection = (HttpURLConnection) waveUrl.openConnection();
             
             InputStream bufferedIn = new BufferedInputStream(urlConnection.getInputStream());
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedIn);
-            
-            new File(dirName).mkdirs();
-            
-            File file = new File(dirName + File.separator + fileName);
-            AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, file);
-            audioInputStream.close();
+            try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedIn)) {
+                
+                new File(dirName).mkdirs();
+                
+                File file = new File(dirName + File.separator + fileName);
+                AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, file);
+            }
         } 
         catch (Exception ex) {
             System.out.println(ex.getMessage());

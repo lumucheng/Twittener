@@ -25,9 +25,9 @@ public class TopicDAO {
         Statement statement = null;
         
         try {
-            Class.forName(DAOUtil.JDBC_DRIVER);
+            Class.forName(DBUtils.JDBC_DRIVER);
             connection = DriverManager.getConnection(
-                    DAOUtil.DB_URL,DAOUtil.DB_USERNAME, DAOUtil.DB_PASSWORD);
+                    DBUtils.DB_URL,DBUtils.DB_USERNAME, DBUtils.DB_PASSWORD);
             statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
 

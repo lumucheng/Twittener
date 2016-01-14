@@ -1,16 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.twittener.Entity;
 
-/**
- *
- * @author Mucheng
- */
 public class TopicAccount {
     
+    public static final String TBL_NAME = "TBL_TOPIC_ACCOUNTS";
     public static final String COL_ID = "id";
     public static final String COL_NAME = "name";
     public static final String COL_SCREENNAME = "screenname";
@@ -108,6 +100,4 @@ public class TopicAccount {
     public void setTopicId(Integer topicId) {
         this.topicId = topicId;
     }
-    
-    
 }
