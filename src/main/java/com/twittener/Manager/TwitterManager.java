@@ -3,9 +3,11 @@ package com.twittener.Manager;
 import com.twittener.DAO.TopicAccountsDAO;
 import com.twittener.DAO.TopicDAO;
 import com.twittener.DAO.TweetDAO;
+import com.twittener.DAO.TweetHyperlinkDAO;
 import com.twittener.DAO.TweetMediaDAO;
 import com.twittener.Entity.Topic;
 import com.twittener.Entity.TopicAccount;
+import com.twittener.Entity.TweetHyperlink;
 import com.twittener.Entity.TweetMedia;
 
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class TwitterManager {
     private final TopicDAO topicDAO;
     private final TopicAccountsDAO topicAccountsDAO;
     private final TweetDAO tweetDAO;
+    private final TweetHyperlinkDAO hyperlinkDAO;
     private final TweetMediaDAO tweetMediaDAO;
 
     public TwitterManager() {
@@ -36,6 +39,7 @@ public class TwitterManager {
         topicDAO = new TopicDAO();
         topicAccountsDAO = new TopicAccountsDAO();
         tweetDAO = new TweetDAO();
+        hyperlinkDAO = new TweetHyperlinkDAO();
         tweetMediaDAO = new TweetMediaDAO();
         
         NLPManager.init();
@@ -102,37 +106,11 @@ public class TwitterManager {
                         // Save only those that has sentiment value > 1
                         if (NLPManager.getSentiment(tweet.getText()) > 1) {
 
+                            System.out.println("INSERT");
                             tweetDAO.insertTweet(tweet);
-                            
-                            // TODO: EXTRACT URL AND SAVE INTO DB
-
-                            MediaEntity[] mediaArray = tweet.getMediaEntities();
-                            for (MediaEntity media : mediaArray) {
-                                TweetMedia tweetMedia = new TweetMedia();
-                                tweetMedia.setMedia_Id(media.getId());
-                                tweetMedia.setMedia_Type(media.getType());
-                                tweetMedia.setMedia_Url(media.getMediaURL());
-                                tweetMedia.setTweet_Id(tweet.getId());
-                                tweetMedia.setMedia_Caption("@" + tweet.getUser().getName()
-                                        + ":" + tweet.getText());
-                                tweetMediaDAO.insertTweetMedia(tweetMedia);
-                            }
-
-                            ExtendedMediaEntity[] extMediaArray = tweet.getExtendedMediaEntities();
-                            for (ExtendedMediaEntity extended : extMediaArray) {
-                                if (extended.getType().equals("video")) {
-                                    TweetMedia videoMedia = new TweetMedia();
-                                    videoMedia.setMedia_Id(extended.getId());
-                                    videoMedia.setMedia_Type(extended.getType());
-                                    videoMedia.setMedia_Url(extended.getMediaURL());
-                                    videoMedia.setTweet_Id(tweet.getId());
-                                    videoMedia.setMedia_Caption("@" + tweet.getUser().getName()
-                                            + ":" + tweet.getText());
-                                    videoMedia.setMedia_VideoUrl(extended.getVideoVariants()[2].getUrl());
-                                    tweetMediaDAO.insertTweetMedia(videoMedia);
-                                }
-                            }
-                            
+                            saveExternalLinks(tweet);
+                            saveTweetMedia(tweet);
+                            saveTweetVideoMedia(tweet);
                             generateWavFile(tweet);
                         }
                     }
@@ -153,6 +131,49 @@ public class TwitterManager {
         }
     }
     
+    private void saveExternalLinks(Status tweet) {
+        
+        List<String> urls = Util.extractUrls(tweet.getText());
+        
+        for (String url : urls) {
+            TweetHyperlink tweetHyperlink = new TweetHyperlink();
+            tweetHyperlink.setHyperlink(url);
+            tweetHyperlink.setTweet_Id(tweet.getId());
+            hyperlinkDAO.insertHyperlink(tweetHyperlink);
+        }
+    }
+    
+    private void saveTweetMedia(Status tweet) {
+        MediaEntity[] mediaArray = tweet.getMediaEntities();
+        for (MediaEntity media : mediaArray) {
+            TweetMedia tweetMedia = new TweetMedia();
+            tweetMedia.setMedia_Id(media.getId());
+            tweetMedia.setMedia_Type(media.getType());
+            tweetMedia.setMedia_Url(media.getMediaURL());
+            tweetMedia.setTweet_Id(tweet.getId());
+            tweetMedia.setMedia_Caption("@" + tweet.getUser().getName()
+                    + ":" + tweet.getText());
+            tweetMediaDAO.insertTweetMedia(tweetMedia);
+        }
+    }
+    
+    private void saveTweetVideoMedia(Status tweet) {
+        ExtendedMediaEntity[] extMediaArray = tweet.getExtendedMediaEntities();
+        for (ExtendedMediaEntity extended : extMediaArray) {
+            if (extended.getType().equals("video")) {
+                TweetMedia videoMedia = new TweetMedia();
+                videoMedia.setMedia_Id(extended.getId());
+                videoMedia.setMedia_Type(extended.getType());
+                videoMedia.setMedia_Url(extended.getMediaURL());
+                videoMedia.setTweet_Id(tweet.getId());
+                videoMedia.setMedia_Caption("@" + tweet.getUser().getName()
+                        + ":" + tweet.getText());
+                videoMedia.setMedia_VideoUrl(extended.getVideoVariants()[2].getUrl());
+                tweetMediaDAO.insertTweetMedia(videoMedia);
+            }
+        }
+    }
+    
     private void generateWavFile(final Status tweet) {
         
         /* Generate wav file on another thread 
@@ -166,7 +187,7 @@ public class TwitterManager {
 
         }).start();
     }
-
+    
     /*
     private void searchTwitterStreamingAPI(String queryStr) {
         // Enter your consumer key and secret below

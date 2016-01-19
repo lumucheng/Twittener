@@ -9,6 +9,7 @@ import com.twittener.Entity.Topic;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 public class TopicDAO {
     
     public ArrayList<Topic> getAllTopics() {
-        ArrayList<Topic> topicList = new ArrayList<Topic>();
+        ArrayList<Topic> topicList = new ArrayList<>();
         String sql = "SELECT * FROM TBL_TOPIC;";
         Connection connection = null;
         Statement statement = null;
@@ -40,7 +41,7 @@ public class TopicDAO {
 
             connection.close();
         } 
-        catch (Exception ex) {
+        catch (ClassNotFoundException | SQLException ex) {
             System.out.println(ex);
         }
         return topicList;

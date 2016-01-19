@@ -2,7 +2,7 @@ package com.twittener.Entity;
 
 public class TweetHyperlink {
     
-    public static final String TBL_NAME = "";
+    public static final String TBL_NAME = "TBL_TWEETS_LINK";
     public static final String COL_ID = "id";
     public static final String COL_HYPERLINK = "hyperlink";
     public static final String COL_TWEET_ID = "tweet_id";
@@ -52,7 +52,5 @@ public class TweetHyperlink {
     public void setTweet_Id(Long tweet_Id) {
         this.tweet_Id = tweet_Id;
     }
-    
-    
     
 }

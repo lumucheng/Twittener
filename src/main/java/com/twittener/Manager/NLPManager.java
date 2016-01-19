@@ -36,7 +36,7 @@ public class NLPManager {
                     .get(CoreAnnotations.SentencesAnnotation.class)) {
                 
                 Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
-                tree.pennPrint();
+                // tree.pennPrint();
                 
                 int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
                 String partText = sentence.toString();
@@ -60,7 +60,7 @@ public class NLPManager {
         for (CoreMap sentence : sentences) {
             for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
                 
-                // NOTE: maybe can check if sentence contains keyword & etc.
+                // NOTE: maybe can check if sentence contains certain keyword & etc.
                 
                 // text of the token
                 String word = token.get(TextAnnotation.class);
