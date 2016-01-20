@@ -80,6 +80,8 @@ public class TwitterManager {
 
     private void searchTwitterRESTAPI(String queryStr, Long sinceId, Long twitterId) {
         
+        Long maxTweetId = 0L;
+        
         Twitter twitter = TwitterFactory.getSingleton();
         Query query = new Query(queryStr);
 
@@ -99,6 +101,10 @@ public class TwitterManager {
 
                 for (final Status tweet : tweets) {
 
+                    if (tweet.getId() > maxTweetId) {
+                        maxTweetId = tweet.getId();
+                    }
+                    
                     if (tweet.getInReplyToScreenName() == null) {
 
                         count++;
@@ -117,7 +123,7 @@ public class TwitterManager {
                 }
                 
                 if (twitterId > 0) {
-                    topicAccountsDAO.updateMaxTweetId(twitterId);
+                    topicAccountsDAO.updateMaxTweetId(maxTweetId, twitterId);
                 }
                 
             } while ((query = result.nextQuery()) != null);
@@ -136,10 +142,24 @@ public class TwitterManager {
         List<String> urls = Util.extractUrls(tweet.getText());
         
         for (String url : urls) {
-            TweetHyperlink tweetHyperlink = new TweetHyperlink();
-            tweetHyperlink.setHyperlink(url);
-            tweetHyperlink.setTweet_Id(tweet.getId());
-            hyperlinkDAO.insertHyperlink(tweetHyperlink);
+            
+            if (Util.validVideo(url)) {
+                TweetMedia videoMedia = new TweetMedia();
+                videoMedia.setMedia_Id(tweet.getId());
+                videoMedia.setMedia_Type("video");
+                videoMedia.setMedia_Url(url);
+                videoMedia.setTweet_Id(tweet.getId());
+                videoMedia.setMedia_Caption("@" + tweet.getUser().getName()
+                        + ":" + tweet.getText());
+                videoMedia.setMedia_VideoUrl(url);
+                tweetMediaDAO.insertTweetMedia(videoMedia);
+            }
+            else {
+                TweetHyperlink tweetHyperlink = new TweetHyperlink();
+                tweetHyperlink.setHyperlink(url);
+                tweetHyperlink.setTweet_Id(tweet.getId());
+                hyperlinkDAO.insertHyperlink(tweetHyperlink);
+            }
         }
     }
     
