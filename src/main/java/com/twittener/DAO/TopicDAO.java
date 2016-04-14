@@ -21,7 +21,7 @@ public class TopicDAO {
     
     public ArrayList<Topic> getAllTopics() {
         ArrayList<Topic> topicList = new ArrayList<>();
-        String sql = "SELECT * FROM TBL_TOPIC;";
+        String sql = "SELECT * FROM TBL_TOPIC WHERE twitter_id = 0;";
         Connection connection = null;
         Statement statement = null;
         

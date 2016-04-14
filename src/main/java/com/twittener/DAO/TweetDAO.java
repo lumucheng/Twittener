@@ -18,7 +18,8 @@ public class TweetDAO {
 
         try {
             Class.forName(DBUtils.JDBC_DRIVER);
-            connection = DriverManager.getConnection(DBUtils.DB_URL, DBUtils.DB_USERNAME, DBUtils.DB_PASSWORD);
+            connection = DriverManager.getConnection(DBUtils.DB_URL, 
+                    DBUtils.DB_USERNAME, DBUtils.DB_PASSWORD);
 
             String sql = "INSERT INTO TBL_TWEETS (tweet_id, text, created_at, "
                     + "twitter_uid, twitter_uname) "
